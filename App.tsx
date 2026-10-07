@@ -1226,13 +1226,13 @@ const App: React.FC = () => {
         {!dbMetadata.isConnected ? (
           <div className="grid grid-cols-2 gap-3">
              <button 
-              onClick={async () => { if(await db.connectToLocalFile(false)) { showToast('数据库连接成功'); refreshData(); } }}
+              onClick={async () => { if (!(window as any).showOpenFilePicker) { showToast('当前浏览器不支持直连文件，请用 Chrome / Edge 桌面版，或用下方"选择文件导入"', 'error'); return; } if(await db.connectToLocalFile(false)) { showToast('数据库连接成功'); refreshData(); } }}
               className="bg-indigo-600 text-white py-4 rounded-2xl font-black text-xs shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2"
             >
               <i className="fa-solid fa-link"></i> 连接本地文件
             </button>
             <button 
-              onClick={async () => { if(await db.connectToLocalFile(true)) { showToast('新数据库创建成功'); refreshData(); } }}
+              onClick={async () => { if (!(window as any).showSaveFilePicker) { showToast('当前浏览器不支持直连文件，请用 Chrome / Edge 桌面版，或用"手动备份"下载备份文件', 'error'); return; } if(await db.connectToLocalFile(true)) { showToast('新数据库创建成功'); refreshData(); } }}
               className="bg-white border border-indigo-100 text-indigo-600 py-4 rounded-2xl font-black text-xs active:scale-95 transition-all flex items-center justify-center gap-2"
             >
               <i className="fa-solid fa-file-circle-plus"></i> 创建新本地文件
@@ -1289,7 +1289,7 @@ const App: React.FC = () => {
           >
             选择文件导入
           </button>
-          <input type="file" ref={syncFileInputRef} className="hidden" accept=".json" onChange={(e) => { const file = e.target.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = (event) => { const content = event.target?.result as string; if (db.importAllData(content, file.name)) { showToast('数据导入成功！'); refreshData(); } else { showToast('数据导入失败', 'error'); } }; reader.readAsText(file); }} />
+          <input type="file" ref={syncFileInputRef} className="hidden" accept=".json" onChange={(e) => { const input = e.target as HTMLInputElement; const file = input.files?.[0]; input.value = ''; if (!file) return; const reader = new FileReader(); reader.onload = (event) => { const content = event.target?.result as string; if (db.importAllData(content, file.name)) { showToast('数据导入成功！'); refreshData(); } else { showToast('所选文件不是有效的药箱备份', 'error'); } }; reader.onerror = () => showToast('文件读取失败，请重试', 'error'); reader.readAsText(file); }} />
         </div>
       </div>
     </div>
